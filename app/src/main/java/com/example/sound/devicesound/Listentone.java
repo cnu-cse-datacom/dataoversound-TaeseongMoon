@@ -35,7 +35,7 @@ public class Listentone {
     private EncoderDecoder encoderDecoder;
     private int mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, mChannelCount, mAudioFormat);
 
-    public AudioRecord mAudioRecord = null;
+    public AudioRecord mAudioRecord;
     int audioEncodig;
     boolean startFlag;
     FastFourierTransformer transform;
@@ -64,11 +64,9 @@ public class Listentone {
                 else chunk[i] = 0;
             }
             double dom = findFrequency(chunk);
-            //Log.v("check", "checking");
 
             if(startFlag && match(dom,HANDSHAKE_END_HZ)) {
                 byte_stream = extract_packet(packet);
-                //Log.v("check", "checking");
                 Log.d("ListenTone packet :", String.valueOf(packet));
                 Log.d("ListenTone bytestream :", String.valueOf(byte_stream));
 
@@ -112,11 +110,6 @@ public class Listentone {
 
     private double findFrequency(double[] toTransform) {
         int len = findPowerSize(toTransform.length);
-        //double[] _toTransform = new double[len];
-        //for(int i = 0; i< _toTransform.length; i++){
-        //    if(i<toTransform.length) _toTransform[i] = (double) toTransform[i];
-        //    else _toTransform[i] = 0;
-        //}
         double realNum;
         double imgNum;
         double[] mag = new double[len];
@@ -143,8 +136,6 @@ public class Listentone {
     }
 
     private Double[] fftfreq(int n, int d) {
-        //if(!(n instanceof Integer))
-        //    System.out.println("n should be an integer");
         double val = 1.0 / (n * d);
         Double[] results = new Double[n];
         int N = (n - 1)/ 2 + 1;
@@ -152,8 +143,6 @@ public class Listentone {
         for(int i = 0; i < N; i++) {
             p[i] = i;
         }
-        //p2 = arange(-(n//2), 0, dtype=int)
-        //      results[N:] = p2
         for(int i = N, j = -(n/2); i < n; i++,j++){
             p[i] = j;
         }
@@ -168,7 +157,6 @@ public class Listentone {
         List<Double> _freqs = new ArrayList<>();
         List<Integer> bit_chunks = new ArrayList<>();
         List<Integer> chunks = new ArrayList<>();
-        byte[] bytes = new byte[freqs.size()/2+freqs.size()%2];
 
         for(int i = 0; i < freqs.size(); i= i+2){
             double f = freqs.get(i);
@@ -183,7 +171,7 @@ public class Listentone {
                 chunks.add(bit_chunks.get(i));
             }
         }
-        Log.d("ListenTone chunks", String.valueOf(chunks));
+        Log.d("ListenTone bits", String.valueOf(chunks));
         byte[] result = decodeBitchunks(BITS, chunks);
         return result;
     }
@@ -219,7 +207,7 @@ public class Listentone {
                 next_read_bit -= bits;
             }
         }
-        Log.d("ListenTone chunks", String.valueOf(out_bytes));
+        Log.d("ListenTone chuncks", String.valueOf(out_bytes));
         byte[] _out_bytes = new byte[out_bytes.size()];
         for(int i = 0; i < _out_bytes.length; i++)
             _out_bytes[i] = (out_bytes.get(i)).byteValue();
